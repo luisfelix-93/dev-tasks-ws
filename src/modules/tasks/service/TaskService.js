@@ -1,23 +1,32 @@
 const Task = require('../model/Tasks');
+const User = require('../../user/model/User')
 
 class TaskService {
-    async createTask(idUser, taskType, dateStart, note) {
+    async createTask(taskCode, taskType, dateStart, note, userId) {
         try{
-            let status = "backlog";
-            let taskCode = this.generateTaskCode(taskType);
-            let task = {idUser, taskType, taskCode, dateStart, note, status};
-            let newTask = new Task(task);
-            return newTask
+            const status = "backlog";
+            const task = {
+                taskCode,
+                taskType,
+                dateStart,
+                status,
+                note,
+                userId
+            };
+
+            const newTask = new Task(task);
+            const savedTask = await newTask.save();
+            return newTask;
         } catch (error){
             throw error
         }
     }
 
-    async getTaskByUser(idUser) {
+    async getTaskByIdUser(idUser) {
         try{
-           const task = Task.findOne({idUser});
+           const task = Task.find({idUser});
            if(!task) throw 'No tasks found for this user';
-           return task;
+           return await task;
         } catch (error){
             throw error
         }
@@ -26,100 +35,71 @@ class TaskService {
         try{
             const task = Task.findOne({taskCode})
             if(!task) throw 'No tasks found for this code';
-            return task;
+            return await task;
         } catch (error){
             throw error
         }
     }
     async updateTask(taskCode, status) {
-        try{
-            task = Task.findOne({taskCode})
-            idTask = task._id;
-            if(status == 'doing') {
-                const dateStart = Date.now(); 
-                const dateEnd = new Date();
-                dateEnd.setDate(dateStart.getDate() + 5);
-                const taskUpdate = Task.findByIdAndUpdate({
-                    _id : idTask,
-                    dateStart,
-                    dateEnd,
-                    status
-                })
-                return taskUpdate;
-            }
-            if(status == 'review'){
-                const date = Date.now();
-                dateEnd.setDate(date.getDate() + 3);
-                const taskUpdate = Task.findByIdAndUpdate({
-                    _id: idTask,
-                    dateEnd, 
-                    status
-                });
-                return taskUpdate;
-            }
-            if(status == 'onDeployment'){
-                const date = Date.now();
-                dateEnd.setDate(date.getDate() + 2);
-                const taskUpdate = Task.findByIdAndUpdate({
-                    _id: idTask,
-                    dateEnd,
-                    status
-                });
-                return taskUpdate;
-            }
-            if(status == "done"){
-                const dateEnd = Date.now();
-                const taskUpdate = Task.findByIdAndUpdate({
-                    _id: idTask,
-                    dateEnd,
-                    status
-                });
-                return taskUpdate  
-            }
-        } catch (error){
-            throw error
-        }
-    }
-    async deleteTaskByCode(taskCode) {
-        try{
-            task = Task.findOne({taskCode});
-            if(!task) {
-                return "Tarefa não encontrada";
-            }
-            await Task.deleteOne({_id : task._id})
-            return "Sucesso ao deletar a tarefa"
-        } catch (error){
-            throw error
-        }
-    }
-    async generateTaskCode(taskType) {
         try {
-            let baseCode = taskType.toUpperCase().slice(0, 3); // Pegar os 3 primeiros caracteres do taskType em maiúsculas
-            let code;
-            let isUnique = false;
-            let counter = 1;
-    
-            // Loop até encontrar um código único
-            while (!isUnique) {
-                // Formatar o contador com três dígitos (por exemplo, 001, 002, ..., 010, 011, ...)
-                let formattedCounter = counter.toString().padStart(3, '0');
-                code = `${baseCode}${formattedCounter}`;
-    
-                // Verificar se o código já existe no banco de dados
-                let existingTask = await Task.findOne({ taskCode: code });
-    
-                if (!existingTask) {
-                    isUnique = true; // O código é único, pode sair do loop
-                } else {
-                    counter++; // Incrementar o contador e tentar novamente
+
+            const task = await Task.findOne(
+                { 
+                    taskCode
                 }
+            ); 
+            if (!task) {
+                return 'Task not found'
             }
     
-            return code;
+            const idTask = task._id;
+            let dateEnd;
+    
+            if (status === 'doing') {
+                const dateStart = Date.now();
+                dateEnd = new Date(dateStart);
+                dateEnd.setDate(dateEnd.getDate() + 5);
+                const taskUpdate = await Task.findByIdAndUpdate(idTask, { dateStart, dateEnd, status }, { new: true });
+                return taskUpdate;
+            }
+            
+            if (status === 'review') {
+                dateEnd = new Date(Date.now());
+                dateEnd.setDate(dateEnd.getDate() + 3);
+                const taskUpdate = await Task.findByIdAndUpdate(idTask, { dateEnd, status }, { new: true });
+                return taskUpdate;
+            }
+    
+            if (status === 'onDeployment') {
+                dateEnd = new Date(Date.now());
+                dateEnd.setDate(dateEnd.getDate() + 2);
+                const taskUpdate = await Task.findByIdAndUpdate(idTask, { dateEnd, status }, { new: true });
+                return taskUpdate;
+            }
+    
+            if (status === 'done') {
+                dateEnd = Date.now();
+                const taskUpdate = await Task.findByIdAndUpdate(idTask, { dateEnd, status }, { new: true });
+                return taskUpdate;
+            }
+    
+            throw new Error('Invalid status');
         } catch (error) {
-            throw error;
+            throw new Error(`Error updating task: ${error}`);
         }
     }
+    // async deleteTaskByCode(taskCode) {
+    //     try{
+    //         const task = Task.findOne({taskCode});
+    //         if(!task) {
+    //             return "Tarefa não encontrada";
+    //         }
+    //         await Task.deleteOne(task._id)
+    //         return "Sucesso ao deletar a tarefa"
+    //     } catch (error){
+    //         throw error
+    //     }
+    // }  
 }
 
 module.exports = new TaskService();
