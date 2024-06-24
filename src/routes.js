@@ -18,7 +18,7 @@ routes.post('/user/:user_id/task', TaskControlller.create); // Create task
 routes.get('/user/:user_id/task', TaskControlller.taskByUser); // Get all the Task by users
 routes.get('/task', TaskControlller.taskByCode); //Get task by TaskCode
 routes.put('/task', TaskController.update); // Update task with the taskCode
-routes.delete('/task', TaskController.delete); //Delete task with the TaskCode
+// routes.delete('/task', TaskController.delete); //Delete task with the TaskCode
 
 
 module.exports = routes;

@@ -76,15 +76,15 @@ class TaskController {
         }
     }
 
-    async delete(req, res) {
-        const taskCode = req.query.taskCode;
-        try{
-            await taskService.deleteTaskByCode(taskCode);
-            return res.status(200).json({message: 'User deleted succesfully'});
-        } catch(error) {
-            return res.status(500).json({message: error});
-        }
-    }
+    // async delete(req, res) {
+    //     const taskCode = req.query.taskCode;
+    //     try{
+    //         await taskService.deleteTaskByCode(taskCode);
+    //         return res.status(200).json({message: 'User deleted succesfully'});
+    //     } catch(error) {
+    //         return res.status(500).json({message: error});
+    //     }
+    // }
 }
 
  module.exports = new TaskController();
