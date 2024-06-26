@@ -1,6 +1,7 @@
 const express = require('express');
 const Router = express.Router;
 const auth = require('./middleware/auth');
+
 const UserController = require('./modules/user/controllers/UserController');
 const TaskControlller = require('./modules/tasks/controller/TaskController');
 const TaskController = require('./modules/tasks/controller/TaskController');
@@ -13,7 +14,7 @@ routes.get('/user/:id', UserController.user); //List all users
 routes.delete('/user/:id', UserController.destroy); //Delete a User
 
 // Tasks Routes
-
+routes.use(auth);
 routes.post('/user/:user_id/task', TaskControlller.create); // Create task
 routes.get('/user/:user_id/task', TaskControlller.taskByUser); // Get all the Task by users
 routes.get('/task', TaskControlller.taskByCode); //Get task by TaskCode

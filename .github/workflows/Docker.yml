@@ -25,4 +25,4 @@ jobs:
        context: .
        file: ./Dockerfile
        push: true
-       tags: luisffilho/dev-pay-api:${{github.ref_name}}
+       tags: luisffilho/dev-task-server:${{github.ref_name}}
