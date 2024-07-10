@@ -24,7 +24,7 @@ class TaskController {
     
             await newTask.save();
             return res.status(201).json({
-                message : 'User succefully created',
+                message : 'Task succefully created',
                 data : newTask
             });
         } catch(error) {
@@ -65,8 +65,20 @@ class TaskController {
         try{
             const updatedTask = await taskService.updateTask(taskCode, status);
             console.log(updatedTask)
-            return  res.status(200).json({message: `Task updated to ${status}`,
-                updatedTask});
+            if(!updatedTask){
+                return  res.status(200).json(
+                    {
+                        message: `Couldn't find the task`,
+                        updatedTask
+                    }
+                );
+            }
+            return  res.status(200).json(
+                {
+                    message: `Task updated to ${status}`,
+                    updatedTask
+                }
+            );
         } catch(error) {
             console.log("Error in updating the task: ", error);
             return res.status(500).json({
